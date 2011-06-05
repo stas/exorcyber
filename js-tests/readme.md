@@ -15,15 +15,20 @@ virtualenv socketio --no-site-packages
 pip install tornado
 pip install tornadio
 ```
+
 Xlib comes as a shared precompiled module,
 on Ubuntu I found it in `/usr/share/pyshared/Xlib`.
+
 ```
 ln -s /usr/share/pyshared/Xlib socketio/lib/python2.7/Xlib
+cd socketio
 ```
 
 Now run
+
 ```
-cd socketio/whereyoudownloadedthefiles
+git clone ...
+cd whereyoudownloadedthefiles
 python server.py
 ```
 
