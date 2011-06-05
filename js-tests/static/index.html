@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Socket.IO Test</title>
+    <script src="http://cdn.socket.io/stable/socket.io.js"></script>
+    <script>WEB_SOCKET_SWF_LOCATION = 'http://cdn.socket.io/stable/WebSocketMain.swf';</script>
+    <script type="text/javascript">
+        // Start the socket
+        var socket = new io.Socket( window.location.hostname, {
+            port: 8081,
+            transports: ['websocket'],
+            rememberTransport: false
+        });
+        socket.connect();
+        
+        socket.addEvent('connect', function() {
+            console.log('Connected...');
+        });
+        
+        socket.on('message', function(msg){
+            console.log(msg);
+            socket.send('Received.');
+        });
+    </script>
+</head>
+
+<body>
+
+</body>
+</html>
