@@ -1,5 +1,8 @@
 #include "input.h"
+#include "debug.h"
 #include <stdio.h>
+
+#include <conio.h>	//windows-only for test purpose
 
 input::input() {
 }
@@ -9,7 +12,8 @@ input::~input() {
 
 
 bool input::read(message& m) {
-	int c = getchar();
+	debug::log("\nKB:reading:");
+	int c = getch();
 	char s[5] = {0, 0, 0, 0, 0};
 	*(int*)s = c;
 	m.add("event", "keypress");

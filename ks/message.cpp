@@ -7,9 +7,9 @@ const char* message::JSon() {
 		ss << '{';
 		//TODO: gen json
 		map<string,string>::iterator i = values.begin();
-		if(values.end()!= i) ss << i->first << ':' << i->second;
+		if(values.end()!= i) ss << "'" << i->first << "':" << i->second;
 		for(++i; values.end()!= i; ++i)
-			ss << ',' << i->first << ':' << i->second;
+			ss << ",'" << i->first << "':" << i->second;
 		ss << '}';
 		string s = ss.str();
 		_json = new char[1+s.size()];

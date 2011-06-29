@@ -7,7 +7,7 @@
     <script>WEB_SOCKET_SWF_LOCATION = 'http://cdn.socket.io/stable/WebSocketMain.swf';</script>
     <script type="text/javascript">
         // Start the socket
-        var socket = new io.Socket( window.location.hostname, {
+        var socket = new io.Socket( '127.0.0.1', {
             port: 8081,
             transports: ['websocket'],
             rememberTransport: false

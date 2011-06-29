@@ -4,8 +4,8 @@
 #include "input.h"
 
 int display(socklib::exception x) {
-	if(NULL== x.msg) fprintf(stderr, "Socket error.");
-	else fprintf(stderr, "Socket error (%s).", x.msg);
+	if(NULL== x.msg) fprintf(stderr, "\nSocket error.");
+	else fprintf(stderr, "\nSocket error (%s).", x.msg);
 	return x.code;
 }
 
@@ -26,5 +26,6 @@ int main(int argc, char* argv[]) {
 			s.clear();
 		}
 	} catch(socklib::exception x) { errc = display(x); }
+	getc(stdin);
 	return 0;
 }
