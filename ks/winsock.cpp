@@ -1,7 +1,9 @@
 #ifdef WIN32
+
 #include "socklib.h"
 #include "debug.h"
 #include <winsock2.h>
+
 #define wsd ((wsData*)lData)
 
 #pragma comment(lib,"ws2_32.lib")
@@ -70,7 +72,10 @@ bool socklib::write(message& m) {
 }
 
 bool socklib::read(message& m) {
-	//TODO
+#define bufSz	0x200
+	char buf[bufSz];
+	int rv = recv(wsd->clnt, buf, bufSz, 0);
+	m.set(buf);
 	return true;
 }
 

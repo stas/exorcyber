@@ -12,7 +12,7 @@ input::~input() {
 
 
 bool input::read(message& m) {
-	debug::log("\nKB:reading:");
+	debug::log("\nCON:reading:");
 	int c = getch();
 	char s[5] = {0, 0, 0, 0, 0};
 	*(int*)s = c;
@@ -23,6 +23,6 @@ bool input::read(message& m) {
 }
 
 bool input::write(message& m) {
-	printf(m.JSon());
+	printf("CON:receive: %s", m.JSon());
 	return true;
 }

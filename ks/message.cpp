@@ -11,18 +11,13 @@ const char* message::JSon() {
 		for(++i; values.end()!= i; ++i)
 			ss << ",'" << i->first << "':" << i->second;
 		ss << '}';
-		string s = ss.str();
-		_json = new char[1+s.size()];
-		strcpy(_json, s.data());
+		_json = ss.str().data();
 	}
 	return _json;
 }
 
 void message::invalidateJSon() {
-	if(NULL!= _json) {
-		delete _json;
-		_json = NULL;
-	}
+	_json = NULL;
 }
 
 message::message() {
@@ -36,6 +31,12 @@ message::~message() {
 void message::clear() {
 	invalidateJSon();
 	values.clear();
+}
+
+void message::set(const char* json) {
+	clear();
+	_json = json;
+	//TODO: parse & set values
 }
 
 template<class T> void message::add(char* name, T value) {

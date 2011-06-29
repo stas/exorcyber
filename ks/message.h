@@ -6,12 +6,13 @@ using namespace std;
 
 class message {
 	map<string,string> values;
-	char* _json;
+	const char* _json;
 	void invalidateJSon();
 public:
 	message();
 	void clear();
 	template<class T> void add(char* name, T value);
+	void set(const char* json);
 	const char* JSon();
 	~message();
 };
