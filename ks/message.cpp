@@ -1,59 +1,170 @@
 #include "message.h"
 #include <sstream>
 
-const char* message::JSon() {
-	if(NULL== _json) {
+//Atomic values
+
+//Helpers
+size_t parseFig(string s, size_t pos) {
+	char c;
+	do c = s[pos++]; while('0'<= c && '9'>= c);
+	return --pos;
+}
+
+bool strCmp(string s, size_t& pos, const char* cmp) {
+	return 0== s.compare(pos, strlen(cmp), cmp);
+}
+
+map<char, char> strEscaping, strUnescaping;
+void initEscapings() {
+	if(0== strEscaping.size()) {
+		strEscaping['\\'] = '\\';
+		strEscaping['\n'] = 'n';
+		strEscaping['\r'] = 'r';
+		strEscaping['\t'] = 't';
+		strEscaping['\''] = '\'';
+		strEscaping['"'] = '"';
+		for(map<char,char>::iterator i = strEscaping.begin(); strEscaping.end()!= i; ++i)
+			strUnescaping[i->second] = i->first;
+	}
+}
+
+void trim(string s, size_t& pos) {
+	pos = s.find_first_not_of(" \n\t", pos);
+	if(pos== string::npos) pos = s.size();
+}
+
+//double
+template<> string atomicValue<double>::json() {
+	stringstream ss;
+	ss << value;
+	return ss.str();
+}
+
+double parseN(string s, size_t& pos) {
+	size_t rp = parseFig(s, pos);
+	if('.'== s[rp]) rp = parseFig(s, ++rp);
+	stringstream ss(s.substr(pos, rp-pos));
+	double rv;
+	ss >> rv;
+	if(pos==rp) throw jsonValue::formatException("numeric", s, pos);
+	pos = rp;
+	return rv;
+}
+
+//bool
+template<> string atomicValue<bool>::json() {
+	return value?"true":"false";
+}
+
+bool parseB(string s, size_t& pos) {
+	if(strCmp(s, pos, "true")) return true;
+	if(strCmp(s, pos, "false")) return false;
+	throw jsonValue::formatException("bool", s, pos);
+}
+
+//string
+template<> string atomicValue<string>::json() {
+	initEscapings();
+	char rpl[3] = { '\\', 0, 0 };
+	string rv(value);
+	for(size_t i=0; i<rv.size(); ++i) {
+		map<char,char>::iterator e = strEscaping.find(rv[i]);
+		if(strEscaping.end() != e) {
+			rpl[1] = e->second;
+			rv.replace(i++, 1, rpl);
+		}
+	}
+	return rv;
+}
+
+string parseS(string s, size_t& pos) {
+	size_t mp = pos, np;
+	stringstream ss;
+	char srch[] = "\\.";
+	srch[1] = s[mp++];
+	if('\''!= srch[1] && '"'!= srch[1]) throw jsonValue::formatException("string", s, pos, "Bad string delimiter");
+	do {
+		np = s.find_first_of(srch, mp);
+		if(np== string::npos) throw jsonValue::formatException("string", s, pos, "Unclosed string");
+		ss << s.substr(mp, np-mp);
+		mp = np;
+		if('\\'== s[mp++]) {
+			map<char,char>::iterator e = strUnescaping.find(s[mp]);
+			if(e== strUnescaping.end())  throw jsonValue::formatException("string", s, mp, "Bad escape character");
+			ss << e->second;
+			continue;
+		}
+	} while(false);
+	pos = mp;
+	return ss.str();
+}
+
+//Messages
+
+string message::json() {
+	if(_json.empty()) {
 		stringstream ss;
 		ss << '{';
-		//TODO: gen json
-		map<string,string>::iterator i = values.begin();
-		if(values.end()!= i) ss << "'" << i->first << "':" << i->second;
-		for(++i; values.end()!= i; ++i)
-			ss << ",'" << i->first << "':" << i->second;
+		map::iterator i = begin();
+		if(end()!= i) {
+			ss << "'" << i->first << "':" << i->second;
+			for(++i; end()!= i; ++i)
+				ss << ",'" << i->first << "':" << i->second->json();
+		}
 		ss << '}';
-		_json = ss.str().data();
+		_json = ss.str();
 	}
 	return _json;
 }
 
 void message::invalidateJSon() {
-	_json = NULL;
+	_json = "";
 }
 
-message::message() {
-	_json = NULL;
-}
+message::message() { _json = ""; }
 
 message::~message() {
-	invalidateJSon();
+	_json = "";
 }
 
-void message::clear() {
-	invalidateJSon();
-	values.clear();
+void message::parse(string s) {
+	size_t pos = 0;
+	parse(s, pos);
+	trim(s, pos);
+	if(pos != s.size()) throw jsonValue::formatException("object", s, pos, "Remaining characters after message");
 }
 
-void message::set(const char* json) {
+void message::parse(string s, size_t& pos) {
 	clear();
-	_json = json;
-	//TODO: parse & set values
+	string name;
+	if('{'!= s[pos++]) throw jsonValue::formatException("object", s, pos, "'{' expected");
+	if('}'!= s[pos++]) --pos; else return;
+	do {
+		trim(s, pos);
+		char c = s[pos];
+		if('"'== c || '\''== c) {
+			name = parseS(s, pos);
+			trim(s, pos);
+			if(':'!= s[pos++]) throw jsonValue::formatException("object", s, pos, "':' expected");
+		} else {
+			size_t p = s.find_first_of(':', pos);
+			if(string::npos == p) throw jsonValue::formatException("object", s, pos, "No further ':' found");
+			name = s.substr(pos, p-pos);
+			pos = ++p;
+		}
+		trim(s, pos);
+		c = s[pos];
+		if('"'== c || '\''== c) (*this)[name] = parseS(s, pos);
+		else if('0'<= c && '9'>= c) (*this)[name] = parseN(s, pos);
+		else if('{'== c) {
+			message* m = new message();
+			m->parse(s, pos);
+			(*this)[name] = m;
+		} else try {
+			(*this)[name] = parseB(s, pos); 
+		} catch(jsonValue::formatException x) {
+			throw jsonValue::formatException("object", s, pos, "Expected JSON value");
+		}
+	} while(','== s[pos]);
+	if('}'!= s[pos++]) throw jsonValue::formatException("object", s, pos, "'}' or ',' expected");
 }
-
-template<class T> void message::add(char* name, T value) {
-	stringstream ss;
-	ss << value;
-	values[name] = ss.str();
-}
-
-template<> void message::add(char* name, string value) {
-	values[name] = "'"+value+"'";
-}
-
-template<> void message::add(char* name, char* value) { add(name, (string)value); }
-template<> void message::add(char* name, const char* value) { add(name, (string)value); }
-
-template void message::add(char* name, int value);
-template void message::add(char* name, long value);
-template void message::add(char* name, float value);
-template void message::add(char* name, double value);
-template void message::add(char* name, bool value);

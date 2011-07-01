@@ -66,16 +66,16 @@ void socklib::clear() {
 }
 
 bool socklib::write(message& m) {
-	const char* msg = m.JSon();
+	string msg = m.json();
 	debug::log("\nSOCK:sending: %s", msg);
-	return present = SOCKET_ERROR!= send(wsd->clnt, msg, strlen(msg), 0);
+	return present = SOCKET_ERROR!= send(wsd->clnt, msg.data(), msg.size(), 0);
 }
 
 bool socklib::read(message& m) {
 #define bufSz	0x200
 	char buf[bufSz];
 	int rv = recv(wsd->clnt, buf, bufSz, 0);
-	m.set(buf);
+	m.parse(buf);
 	return true;
 }
 

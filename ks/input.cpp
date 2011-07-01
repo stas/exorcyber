@@ -13,16 +13,16 @@ input::~input() {
 
 bool input::read(message& m) {
 	debug::log("\nCON:reading:");
-	int c = getch();
+	int c = _getch();
 	char s[5] = {0, 0, 0, 0, 0};
 	*(int*)s = c;
-	m.add("event", "keypress");
-	m.add("key", c);
-	m.add("char", s);
+	m["event"] = "keypress";
+	m["key"] = c;
+	m["char"] = s;
 	return true;
 }
 
 bool input::write(message& m) {
-	printf("CON:receive: %s", m.JSon());
+	printf("CON:receive: %s", m.json());
 	return true;
 }

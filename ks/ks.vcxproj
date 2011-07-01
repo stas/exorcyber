@@ -85,6 +85,8 @@
     <ClInclude Include="debug.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="message.h" />
+    <ClInclude Include="nullable.h" />
+    <ClInclude Include="rc.h" />
     <ClInclude Include="socklib.h" />
     <ClInclude Include="threadlib.h" />
   </ItemGroup>
