@@ -35,6 +35,7 @@ DWORD WINAPI launcher(__in LPVOID lpParameter) {
 	launcherParms* prms = (launcherParms*)lpParameter;
 	prms->p(prms->prm);
 	*prms->running = false;
+	delete prms;
 	return 0;
 }
 
@@ -42,11 +43,11 @@ DWORD WINAPI launcher(__in LPVOID lpParameter) {
 void thread::start(void* prm = NULL)
 {
 	lData = new wtData();
-	launcherParms prms;
-	prms.p = p;
-	prms.prm = prm;
-	prms.running = &running;
-	wtd->hndl = CreateThread(NULL, 0, launcher, &prms, 0, wtd->id);
+	launcherParms* prms = new launcherParms();
+	prms->p = p;
+	prms->prm = prm;
+	prms->running = &running;
+	wtd->hndl = CreateThread(NULL, 0, launcher, prms, 0, wtd->id);
 	running = NULL!= wtd->hndl;
 }
 

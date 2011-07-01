@@ -35,20 +35,14 @@ void trim(string s, size_t& pos) {
 
 //double
 template<> string atomicValue<double>::json() {
-	stringstream ss;
-	ss << value;
-	return ss.str();
+	return to_string(value);
 }
 
 double parseN(string s, size_t& pos) {
 	size_t rp = parseFig(s, pos);
 	if('.'== s[rp]) rp = parseFig(s, ++rp);
-	stringstream ss(s.substr(pos, rp-pos));
-	double rv;
-	ss >> rv;
 	if(pos==rp) throw jsonValue::formatException("numeric", s, pos);
-	pos = rp;
-	return rv;
+	return stod(s.substr(pos, rp-pos));
 }
 
 //bool
@@ -154,17 +148,19 @@ void message::parse(string s, size_t& pos) {
 		}
 		trim(s, pos);
 		c = s[pos];
-		if('"'== c || '\''== c) (*this)[name] = parseS(s, pos);
-		else if('0'<= c && '9'>= c) (*this)[name] = parseN(s, pos);
+		msgValue v;
+		if('"'== c || '\''== c) v = parseS(s, pos);
+		else if('0'<= c && '9'>= c) v = parseN(s, pos);
 		else if('{'== c) {
 			message* m = new message();
 			m->parse(s, pos);
-			(*this)[name] = m;
+			v = m;
 		} else try {
-			(*this)[name] = parseB(s, pos); 
+			v = parseB(s, pos); 
 		} catch(jsonValue::formatException x) {
 			throw jsonValue::formatException("object", s, pos, "Expected JSON value");
 		}
+		(*this)[name] = v;
 	} while(','== s[pos]);
 	if('}'!= s[pos++]) throw jsonValue::formatException("object", s, pos, "'}' or ',' expected");
 }

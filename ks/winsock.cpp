@@ -65,18 +65,16 @@ void socklib::clear() {
 	sclear(wsd->clnt);
 }
 
-bool socklib::write(message& m) {
-	string msg = m.json();
-	debug::log("\nSOCK:sending: %s", msg);
-	return present = SOCKET_ERROR!= send(wsd->clnt, msg.data(), msg.size(), 0);
+bool socklib::send(const char* data, size_t size) {
+	return SOCKET_ERROR!= ::send(wsd->clnt, data, size, 0);
 }
 
-bool socklib::read(message& m) {
-#define bufSz	0x200
-	char buf[bufSz];
-	int rv = recv(wsd->clnt, buf, bufSz, 0);
-	m.parse(buf);
-	return true;
+size_t socklib::recv(char* data, size_t size) {
+	return ::recv(wsd->clnt, data, size, 0);
+}
+
+bool socklib::fill(char* data, size_t size) {
+	return size== ::recv(wsd->clnt, data, size, MSG_WAITALL);
 }
 
 #endif

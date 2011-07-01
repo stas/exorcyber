@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <conio.h>
-#include "socklib.h"
+#include "jsonws.h"
 #include "input.h"
 #include "threadlib.h"
 
@@ -28,7 +28,7 @@ void fullDuplex(messager& a, messager& b) {
 int main(int argc, char* argv[]) {
 	int errc = 0;
 	try {
-		socklib s;
+		jsonws s;
 		input k;
 		while(s.connect(8081)) {
 			fullDuplex(k, s);

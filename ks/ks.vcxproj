@@ -76,7 +76,9 @@
   <ItemGroup>
     <ClCompile Include="debug.cpp" />
     <ClCompile Include="input.cpp" />
+    <ClCompile Include="jsonws.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="md5.cpp" />
     <ClCompile Include="message.cpp" />
     <ClCompile Include="winsock.cpp" />
     <ClCompile Include="winthread.cpp" />
@@ -84,6 +86,8 @@
   <ItemGroup>
     <ClInclude Include="debug.h" />
     <ClInclude Include="input.h" />
+    <ClInclude Include="jsonws.h" />
+    <ClInclude Include="md5.h" />
     <ClInclude Include="message.h" />
     <ClInclude Include="nullable.h" />
     <ClInclude Include="rc.h" />
