@@ -2,6 +2,13 @@
 #include "debug.h"
 #include "md5.h"
 #include <sstream>
+#ifdef WIN32
+#include <WinSock2.h>
+#else
+#include <stddef.h>
+#include <sys/types.h>
+#include <net/hton.h>
+#endif
 
 int overload[] = { 8 };	//Length of raw data given after the HTTP request header, in function of the version number
 
@@ -12,7 +19,7 @@ string consume(string rdr, size_t& pos, string lmt = "\r\n") {
 	return rdr.substr(pos-s, l);
 }
 
-long decode0(string ky) {
+ulong decode0(string ky) {
 	string nbr = "";
 	int ns = 0;
 	for(string::iterator i=ky.begin(); ky.end()!= i; ++i) {
@@ -20,7 +27,9 @@ long decode0(string ky) {
 		else if('0'<= *i && '9'>= *i) nbr += *i;
 	}
 	if(0== ns || ""== nbr) throw jsonws::exception("Bad client keys");
-	return stol(nbr)/ns;
+	ulong rv = stol(nbr);
+	if(0!= rv%ns) throw jsonws::exception("Bad websocket keys");
+	return rv/ns;
 }
 
 bool jsonws::connect(short port) {
@@ -69,8 +78,10 @@ bool jsonws::connect(short port) {
 			out << "Sec-WebSocket-Protocol: " << i->second << "\r\n";
 		switch(version) {
 		case 0:
-			long k[4] = { decode0(hdrs["Sec-WebSocket-Key1"]), decode0(hdrs["Sec-WebSocket-Key2"]) };
-			const long* clntK = (const long*)(sb.data()+pos);
+			//ulong k[4] = { htonl(decode0(hdrs["Sec-WebSocket-Key1"])), htonl(decode0(hdrs["Sec-WebSocket-Key2"])) };
+			//const long* clntK = (const long*)(sb.data()+pos);
+			ulong k[4] = { htonl(decode0("3e6b263  4 17 80")), htonl(decode0("17  9 G`ZD9   2 2b 7X 3 /r90")) };
+			const long* clntK = (const long*)("WjN}|M(6");
 			k[2] = clntK[0]; k[3] = clntK[1];
 			MD5 md5;
 			md5.update((const char*)k, 16);
@@ -91,8 +102,19 @@ bool jsonws::connect(short port) {
 bool jsonws::write(message& m) {
 	string msg = m.json();
 	debug::log("\nSOCK:sending: %s", msg.data());
-	msg = string("\0", 1) + msg;
-	msg.push_back(-1);
+	if(false) {
+		msg = string("", 1) + msg;
+		msg.push_back(-1);
+	} else {
+		stringstream ss;
+		ss << (char)-1;
+		size_t l = msg.size();
+		while(0!= l&(!0x7f))
+			ss << (char)(0x80|(l&0x7f));
+		ss << (char)(l&0x7f);
+		ss << msg;
+		msg = ss.str();
+	}
 	return present = send(msg);
 }
 
