@@ -28,6 +28,7 @@ socklib::socklib() {
 
 void sclear(SOCKET& s) {
 	if(NULL!= s) {
+		debug::log("\nSOCK:disconnected");
 		closesocket(s);
 		s = NULL;
 	}
@@ -65,12 +66,23 @@ void socklib::clear() {
 	sclear(wsd->clnt);
 }
 
-bool socklib::send(const char* data, size_t size) {
-	return SOCKET_ERROR!= ::send(wsd->clnt, data, size, 0);
+bool socklib::send(const string& s) {
+	return SOCKET_ERROR!= ::send(wsd->clnt, s.data(), s.size(), 0);
 }
 
-size_t socklib::recv(char* data, size_t size) {
-	return ::recv(wsd->clnt, data, size, 0);
+string socklib::recv() {
+	static size_t bufSize = 0x200;
+	char* data = new char[bufSize];
+	int rvl;
+	do rvl = ::recv(wsd->clnt, data, bufSize, 0);
+	while(SOCKET_ERROR== rvl && WSAEMSGSIZE== WSAGetLastError() && 0<(bufSize=rvl));
+	if(SOCKET_ERROR== rvl) {
+		debug::log("\nrecv error : %d", WSAGetLastError());
+		return "";
+	}
+	string rv(data, rvl);
+	delete data;
+	return rv;
 }
 
 bool socklib::fill(char* data, size_t size) {

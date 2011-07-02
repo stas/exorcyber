@@ -4,10 +4,10 @@
 #include "input.h"
 #include "threadlib.h"
 
-int display(socklib::exception x) {
-	if(NULL== x.msg) fprintf(stderr, "\nSocket error.");
-	else fprintf(stderr, "\nSocket error (%s).", x.msg);
-	return x.code;
+int display(exception x) {
+	if(NULL== x.what()) fprintf(stderr, "\nError.");
+	else fprintf(stderr, "\nError (%s).", x.what());
+	return -1;
 }
 
 struct tlParms {
@@ -17,8 +17,10 @@ struct tlParms {
 
 void halfDuplex(tlParms* tlp) {
 	message m;
-	// woohoo \o/
-	while(tlp->src.present && tlp->src.read(m) && tlp->dst.present && tlp->dst.write(m)) m.clear();
+	try {
+		// woohoo \o/
+		while(tlp->src.present && tlp->src.read(m) && tlp->dst.present && tlp->dst.write(m)) m.clear();
+	} catch(exception x) { display(x); }
 }
 
 void fullDuplex(messager& a, messager& b) {
@@ -31,10 +33,11 @@ int main(int argc, char* argv[]) {
 		jsonws s;
 		input k;
 		while(s.connect(8081)) {
-			fullDuplex(k, s);
+			halfDuplex(&tlParms(k, s));
 			s.clear();
 		}
-	} catch(socklib::exception x) { errc = display(x); }
+	} catch(exception x) { errc = display(x); }
+	printf("\npak");
 	getc(stdin);
 	return 0;
 }

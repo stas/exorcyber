@@ -84,12 +84,12 @@
     <ClCompile Include="winthread.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="comon.h" />
     <ClInclude Include="debug.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="jsonws.h" />
     <ClInclude Include="md5.h" />
     <ClInclude Include="message.h" />
-    <ClInclude Include="nullable.h" />
     <ClInclude Include="rc.h" />
     <ClInclude Include="socklib.h" />
     <ClInclude Include="threadlib.h" />

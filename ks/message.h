@@ -3,7 +3,9 @@
 #include <string>
 #include "rc.h"
 
-using namespace std;
+//TODO: json not invalidated
+
+typedef long double numeric;
 
 class jsonValue : public rcd {
 public:
@@ -29,14 +31,14 @@ public:
 class msgValue : public rcr<jsonValue> {
 public:
 	template<class T> msgValue operator=(T* value) { set(value); return *this; }
-	msgValue operator=(double value) { return *this = new atomicValue<double>(value); }
-	msgValue operator=(float value) { return *this = new atomicValue<double>(value); }
-	msgValue operator=(int value) { return *this = new atomicValue<double>(value); }
-	msgValue operator=(long value) { return *this = new atomicValue<double>(value); }
-	msgValue operator=(short value) { return *this = new atomicValue<double>(value); }
-	msgValue operator=(unsigned int value) { return *this = new atomicValue<double>(value); }
-	msgValue operator=(unsigned long value) { return *this = new atomicValue<double>(value); }
-	msgValue operator=(unsigned short value) { return *this = new atomicValue<double>(value); }
+	msgValue operator=(numeric value) { return *this = new atomicValue<numeric>(value); }
+	msgValue operator=(float value) { return *this = new atomicValue<numeric>(value); }
+	msgValue operator=(int value) { return *this = new atomicValue<numeric>(value); }
+	msgValue operator=(long value) { return *this = new atomicValue<numeric>(value); }
+	msgValue operator=(short value) { return *this = new atomicValue<numeric>(value); }
+	msgValue operator=(unsigned int value) { return *this = new atomicValue<numeric>(value); }
+	msgValue operator=(unsigned long value) { return *this = new atomicValue<numeric>(value); }
+	msgValue operator=(unsigned short value) { return *this = new atomicValue<numeric>(value); }
 	msgValue operator=(bool value) { return *this = new atomicValue<bool>(value); }
 	msgValue operator=(string value) { return *this = new atomicValue<string>(value); }
 	msgValue operator=(const char* value) { return *this = new atomicValue<string>(value); }
@@ -45,12 +47,11 @@ public:
 };
 
 class message : public jsonValue, public map<string,msgValue> {
-	string _json;
-	void invalidateJSon();
 public:
 	message();
-	void parse(string s);
-	void parse(string s, size_t& pos);
+	void parse(const string& s);
+	void parse(const string& s, size_t& pos);
+
 	string json();
 	~message();
 };

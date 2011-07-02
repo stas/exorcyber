@@ -20,7 +20,7 @@
         
         socket.on('message', function(msg){
             console.log(msg);
-            socket.send('Received.');
+            socket.send("{'event':'Received.'}");
         });
     </script>
 </head>

@@ -4,13 +4,13 @@
 //Atomic values
 
 //Helpers
-size_t parseFig(string s, size_t pos) {
+size_t parseFig(const string& s, size_t pos) {
 	char c;
 	do c = s[pos++]; while('0'<= c && '9'>= c);
 	return --pos;
 }
 
-bool strCmp(string s, size_t& pos, const char* cmp) {
+bool strCmp(const string& s, size_t& pos, const char* cmp) {
 	return 0== s.compare(pos, strlen(cmp), cmp);
 }
 
@@ -28,17 +28,17 @@ void initEscapings() {
 	}
 }
 
-void trim(string s, size_t& pos) {
+void trim(const string& s, size_t& pos) {
 	pos = s.find_first_not_of(" \n\t", pos);
 	if(pos== string::npos) pos = s.size();
 }
 
-//double
-template<> string atomicValue<double>::json() {
+//numeric
+template<> string atomicValue<numeric>::json() {
 	return to_string(value);
 }
 
-double parseN(string s, size_t& pos) {
+numeric parseN(const string& s, size_t& pos) {
 	size_t rp = parseFig(s, pos);
 	if('.'== s[rp]) rp = parseFig(s, ++rp);
 	if(pos==rp) throw jsonValue::formatException("numeric", s, pos);
@@ -50,7 +50,7 @@ template<> string atomicValue<bool>::json() {
 	return value?"true":"false";
 }
 
-bool parseB(string s, size_t& pos) {
+bool parseB(const string& s, size_t& pos) {
 	if(strCmp(s, pos, "true")) return true;
 	if(strCmp(s, pos, "false")) return false;
 	throw jsonValue::formatException("bool", s, pos);
@@ -68,10 +68,11 @@ template<> string atomicValue<string>::json() {
 			rv.replace(i++, 1, rpl);
 		}
 	}
-	return rv;
+	rv.push_back('\'');
+	return string("'") + rv;
 }
 
-string parseS(string s, size_t& pos) {
+string parseS(const string& s, size_t& pos) {
 	size_t mp = pos, np;
 	stringstream ss;
 	char srch[] = "\\.";
@@ -96,39 +97,30 @@ string parseS(string s, size_t& pos) {
 //Messages
 
 string message::json() {
-	if(_json.empty()) {
-		stringstream ss;
-		ss << '{';
-		map::iterator i = begin();
-		if(end()!= i) {
-			ss << "'" << i->first << "':" << i->second;
-			for(++i; end()!= i; ++i)
-				ss << ",'" << i->first << "':" << i->second->json();
-		}
-		ss << '}';
-		_json = ss.str();
+	stringstream ss;
+	ss << '{';
+	map::iterator i = begin();
+	if(end()!= i) {
+		ss << "'" << i->first << "':" << i->second->json();
+		for(++i; end()!= i; ++i)
+			ss << ",'" << i->first << "':" << i->second->json();
 	}
-	return _json;
+	ss << '}';
+	return ss.str();
 }
 
-void message::invalidateJSon() {
-	_json = "";
-}
+message::message() { }
 
-message::message() { _json = ""; }
+message::~message() { }
 
-message::~message() {
-	_json = "";
-}
-
-void message::parse(string s) {
+void message::parse(const string& s) {
 	size_t pos = 0;
 	parse(s, pos);
 	trim(s, pos);
 	if(pos != s.size()) throw jsonValue::formatException("object", s, pos, "Remaining characters after message");
 }
 
-void message::parse(string s, size_t& pos) {
+void message::parse(const string& s, size_t& pos) {
 	clear();
 	string name;
 	if('{'!= s[pos++]) throw jsonValue::formatException("object", s, pos, "'{' expected");

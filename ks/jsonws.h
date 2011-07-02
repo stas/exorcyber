@@ -3,13 +3,11 @@
 #include "socklib.h"
 
 class jsonws : public socklib {
-	bool send(string s);
 	char version;
 public:
-	class exception {
+	class exception : public std::exception {
 	public:
-		string message;
-		exception(string message) : message(message) {}
+		exception(const char* msg) : std::exception(msg) {}
 	};
 	bool connect(short port);
 	bool write(message& m);

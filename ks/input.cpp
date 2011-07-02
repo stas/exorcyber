@@ -10,12 +10,12 @@ input::input() {
 input::~input() {
 }
 
-
 bool input::read(message& m) {
 	debug::log("\nCON:reading:");
 	int c = _getch();
 	char s[5] = {0, 0, 0, 0, 0};
 	*(int*)s = c;
+	m.clear();
 	m["event"] = "keypress";
 	m["key"] = c;
 	m["char"] = s;
@@ -23,6 +23,6 @@ bool input::read(message& m) {
 }
 
 bool input::write(message& m) {
-	printf("CON:receive: %s", m.json());
+	printf("\nCON:receive: %s", m.json().data());
 	return true;
 }

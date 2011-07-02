@@ -9,7 +9,7 @@ public:
 	rcd() : refCpt(0) {}
 	~rcd() { debug::assert(0== refCpt); }
 	rcd* ref() { ++refCpt; return this; }
-	bool unref() { return 1<= refCpt; }
+	bool unref() { return 1<= --refCpt; }
 };
 
 //Reference CounteR
