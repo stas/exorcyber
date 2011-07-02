@@ -77,16 +77,22 @@ string socklib::recv() {
 	do rvl = ::recv(wsd->clnt, data, bufSize, 0);
 	while(SOCKET_ERROR== rvl && WSAEMSGSIZE== WSAGetLastError() && 0<(bufSize=rvl));
 	if(SOCKET_ERROR== rvl) {
-		debug::log("\nrecv error : %d", WSAGetLastError());
-		return "";
-	}
+		int err = WSAGetLastError();
+		debug::log("\nrecv error : %d", err);
+		throw socklib::exception(err, "recv failure");
+	} else if(0== rvl) throw socklib::exception(-1, "Connection reset by peer");
 	string rv(data, rvl);
 	delete data;
 	return rv;
 }
 
-bool socklib::fill(char* data, size_t size) {
-	return size== ::recv(wsd->clnt, data, size, MSG_WAITALL);
+string socklib::fill(size_t size) {
+	char* data = new char[size];
+	if(size!= ::recv(wsd->clnt, data, size, MSG_WAITALL))
+		throw socklib::exception(-1, "fill-recv failure");
+	string rv(data, size);
+	delete data;
+	return rv;
 }
 
 #endif

@@ -1,15 +1,10 @@
 #pragma once
 
-#include "socklib.h"
+#include "sillysock.h"
 
-class jsonws : public socklib {
-	char version;
+class jsonws : public sillysock {
 public:
-	class exception : public std::exception {
-	public:
-		exception(const char* msg) : std::exception(msg) {}
-	};
 	bool connect(short port);
-	bool write(message& m);
+	bool write(message& m);	//TODO: dare to make it const message&
 	bool read(message& m);
 };

@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
 		jsonws s;
 		input k;
 		while(s.connect(8081)) {
-			halfDuplex(&tlParms(k, s));
+			fullDuplex(k, s);
 			s.clear();
 		}
 	} catch(exception x) { errc = display(x); }

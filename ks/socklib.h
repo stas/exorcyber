@@ -6,7 +6,7 @@ protected:
 	bool send(const string& s);
 	string recv();
 	//recv, wait buffer-full to return
-	bool fill(char* data, size_t size);
+	string fill(size_t size);
 	bool connect(short port);
 public:
 	class exception : public std::exception {

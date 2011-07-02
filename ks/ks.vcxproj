@@ -80,6 +80,8 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="md5.cpp" />
     <ClCompile Include="message.cpp" />
+    <ClCompile Include="sillysock.cpp" />
+    <ClCompile Include="websocket.cpp" />
     <ClCompile Include="winsock.cpp" />
     <ClCompile Include="winthread.cpp" />
   </ItemGroup>
@@ -91,8 +93,10 @@
     <ClInclude Include="md5.h" />
     <ClInclude Include="message.h" />
     <ClInclude Include="rc.h" />
+    <ClInclude Include="sillysock.h" />
     <ClInclude Include="socklib.h" />
     <ClInclude Include="threadlib.h" />
+    <ClInclude Include="websocket.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
