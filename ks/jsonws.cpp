@@ -78,10 +78,11 @@ bool jsonws::connect(short port) {
 			out << "Sec-WebSocket-Protocol: " << i->second << "\r\n";
 		switch(version) {
 		case 0:
-			//ulong k[4] = { htonl(decode0(hdrs["Sec-WebSocket-Key1"])), htonl(decode0(hdrs["Sec-WebSocket-Key2"])) };
-			//const long* clntK = (const long*)(sb.data()+pos);
+			ulong k[4] = { htonl(decode0(hdrs["Sec-WebSocket-Key1"])), htonl(decode0(hdrs["Sec-WebSocket-Key2"])) };
+			const ulong* clntK = (const ulong*)(sb.data()+pos);
+			/*This gives "n`9eBk9z$R8pOtVb"
 			ulong k[4] = { htonl(decode0("3e6b263  4 17 80")), htonl(decode0("17  9 G`ZD9   2 2b 7X 3 /r90")) };
-			const long* clntK = (const long*)("WjN}|M(6");
+			const ulong* clntK = (const ulong*)("WjN}|M(6");*/
 			k[2] = clntK[0]; k[3] = clntK[1];
 			MD5 md5;
 			md5.update((const char*)k, 16);
