@@ -10,7 +10,7 @@ bool sillysock::connect(short port) {
 
 bool sillysock::write(const string& s) {
 	stringstream ss;
-	ss << "~m~" << s.size() << "###" << s;
+	ss << "~m~" << s.size() << "~m~" << s;
 	return ws::write(ss.str());
 }
 

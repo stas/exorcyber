@@ -123,7 +123,7 @@ string ws::read() {
 	if(rcvBuf.empty()) rcvBuf = recv();
 	char algo = rcvBuf[0];
 	string frame;
-	size_t pos = 0, beg = 1;
+	size_t pos = 0, beg = 1, skip = 1;
 	//TODO: both algos to test
 	if(0== (algo&0x80)) {	//00 .. .. .. FF
 		while(string::npos== (pos=rcvBuf.find_first_of('\xff', pos))) {
@@ -139,8 +139,9 @@ string ws::read() {
 		pos += beg;
 		//Here, 'pos' is the position of the first byte after the frame
 		if(rcvBuf.size() < pos) rcvBuf += fill(pos-rcvBuf.size());
+		skip = 0;
 	}
 	frame = rcvBuf.substr(beg, pos-beg);
-	rcvBuf = rcvBuf.substr(pos);
+	rcvBuf = rcvBuf.substr(pos+skip);
 	return frame;
 }
